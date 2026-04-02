@@ -1,10 +1,4 @@
-# ============================================================
-# Project Title : Event Management Website
-# File          : app.py  (Flask Application Entry Point)
-# Student Name  : [Your Name]
-# Roll Number   : [Your Roll Number]
-# Date          : 2025
-# ============================================================
+
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
