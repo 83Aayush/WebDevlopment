@@ -1,1 +1,11 @@
+/*
+ * static/style.css
+ * Optional extra styles — all core CSS lives in base.html <style> block.
+ * Add any customizations here if needed.
+ */
 
+/* Example: highlight the active nav link */
+nav a.active {
+  color: var(--text);
+  background: var(--surface);
+}
