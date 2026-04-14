@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Create Account — Paramount Hotel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  
+</head>
+<body>
+
+<div class="signup-page">
+
+  <div class="signup-left">
+    <div class="signup-left-inner">
+      <span class="brand"><em>Paramount</em> Hotel</span>
+      <h2>Join the<br>Circle</h2>
+      <p>Create your free Paramount membership and unlock a world of exclusive privileges.</p>
+      <div class="benefit-pills">
+        <span class="pill">Early Check-in</span>
+        <span class="pill">Room Upgrades</span>
+        <span class="pill">Member Rates</span>
+        <span class="pill">Priority Service</span>
+        <span class="pill">Free Cancellation</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form -->
+  <div class="signup-right">
+    <div class="signup-box">
+
+      <div style="font-family:var(--serif);font-size:1.4rem;letter-spacing:3px;color:var(--gold);margin-bottom:28px;display:none" class="mob-logo"><em>Paramount</em> Hotel</div>
+
+      <h2>Create Account</h2>
+      <p class="sub">Already a member? <a href="login.html">Sign in here →</a></p>
+
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="r-name" placeholder="Your full name" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="r-email" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="r-phone" placeholder="+91 00000 00000"/>
+      </div>
+      <div class="form-group">
+        <label>Password *</label>
+        <div class="pw-wrap">
+          <input type="password" id="r-pw" placeholder="Min 6 characters" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+          <span class="pw-eye" onclick="togglePw('r-pw',this)">👁</span>
+        </div>
+        <div class="strength-wrap"><div class="strength-bar" id="s-bar"></div></div>
+        <div id="s-label" style="font-size:.65rem;color:var(--muted);margin-top:4px"></div>
+      </div>
+
+      <button class="btn-auth" onclick="doSignup()">Create Account →</button>
+      <div class="msg" id="signup-msg"></div>
+
+      <div class="divider">already have an account?</div>
+      <button class="btn-back" onclick="location.href='login.html'">← Sign In Instead</button>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/backend.js"></script>
+<script>
+  if(DB.isLoggedIn()) location.href='index.html';
+  if(window.innerWidth<=900) document.querySelector('.mob-logo').style.display='block';
+
+  function msg(id,text,type){ const e=document.getElementById(id); e.textContent=text; e.className='msg '+type; }
+
+  function checkStrength(v){
+    const bar=document.getElementById('s-bar'), lbl=document.getElementById('s-label');
+    if(!v){bar.style.width='0';lbl.textContent='';return;}
+    let score=0;
+    if(v.length>=6) score++;
+    if(v.length>=10) score++;
+    if(/[A-Z]/.test(v)) score++;
+    if(/[0-9]/.test(v)) score++;
+    if(/[^A-Za-z0-9]/.test(v)) score++;
+    const levels=[
+      {w:'20%',bg:'#e8a0a0',t:'Weak'},
+      {w:'40%',bg:'#f0c060',t:'Fair'},
+      {w:'60%',bg:'#f0c060',t:'Good'},
+      {w:'80%',bg:'#7dbfa0',t:'Strong'},
+      {w:'100%',bg:'#7dbfa0',t:'Very Strong'},
+    ];
+    const l=levels[Math.min(score-1,4)]||levels[0];
+    bar.style.width=l.w; bar.style.background=l.bg; lbl.textContent=l.t;
+  }
+
+  function doSignup(){
+    const name =document.getElementById('r-name').value.trim();
+    const email=document.getElementById('r-email').value.trim();
+    const phone=document.getElementById('r-phone').value.trim();
+    const pw   =document.getElementById('r-pw').value;
+    const res  =DB.registerUser({name,email,phone,password:pw});
+    if(!res.success){ msg('signup-msg',res.error,'error'); return; }
+    DB.saveSession(res.user);
+    msg('signup-msg','✓ Account created! Redirecting…','success');
+    setTimeout(()=>location.href='index.html',900);
+  }
+
+  function togglePw(id,el){
+    const inp=document.getElementById(id);
+    inp.type=inp.type==='password'?'text':'password';
+    el.textContent=inp.type==='password'?'👁':'🙈';
+  }
+
+  document.addEventListener('keydown',e=>{ if(e.key==='Enter') doSignup(); });
+</script>
+</body>
+</html>
+
+ <style>
+    body{overflow:hidden;}
+    .signup-page{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;}
+
+    /* ── LEFT ── */
+    .signup-left{
+      background:url('https://images.unsplash.com/photo-1590490360182-c33d57733427?w=1200&q=90') center/cover no-repeat;
+      position:relative;display:flex;align-items:center;justify-content:center;padding:56px;
+    }
+    .signup-left::before{content:'';position:absolute;inset:0;background:rgba(10,10,10,.7);}
+    .signup-left-inner{position:relative;z-index:1;text-align:center;}
+    .signup-left-inner .brand{font-family:var(--serif);font-size:1.9rem;letter-spacing:4px;color:var(--gold);display:block;margin-bottom:28px;}
+    .signup-left-inner .brand em{font-style:italic;}
+    .signup-left-inner h2{font-family:var(--serif);font-size:2.6rem;font-weight:300;line-height:1.15;margin-bottom:18px;}
+    .signup-left-inner p{font-size:.9rem;color:rgba(248,246,242,.68);line-height:1.85;max-width:320px;margin:0 auto 36px;}
+    .benefit-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+    .pill{background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.3);color:var(--gold-light);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;padding:7px 16px;border-radius:20px;}
+
+    /* ── RIGHT ── */
+    .signup-right{background:var(--charcoal);display:flex;align-items:center;justify-content:center;padding:56px 52px;overflow-y:auto;}
+    .signup-box{width:100%;max-width:420px;}
+    .signup-box h2{font-family:var(--serif);font-size:2rem;font-weight:300;margin-bottom:8px;}
+    .signup-box .sub{font-size:.8rem;color:var(--muted);margin-bottom:34px;}
+    .signup-box .sub a{color:var(--gold);cursor:pointer;}
+    .signup-box .sub a:hover{text-decoration:underline;}
+
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:44px;}
+    .pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:.9rem;opacity:.45;transition:opacity .2s;user-select:none;}
+    .pw-eye:hover{opacity:1;}
+
+    /* Strength bar */
+    .strength-wrap{margin-top:6px;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+    .strength-bar{height:100%;width:0;border-radius:2px;transition:width .4s ease,background .4s ease;}
+
+    .btn-auth{width:100%;background:var(--gold);color:var(--dark);padding:15px;border:none;cursor:pointer;font-family:var(--sans);font-size:.76rem;letter-spacing:2.5px;text-transform:uppercase;font-weight:500;border-radius:var(--r);transition:var(--t);margin-top:8px;}
+    .btn-auth:hover{background:var(--gold-light);}
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;font-size:.7rem;color:var(--muted);}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(201,169,110,.15);}
+    .btn-back{background:none;border:1px solid rgba(248,246,242,.15);color:var(--muted);padding:12px;width:100%;cursor:pointer;font-family:var(--sans);font-size:.72rem;letter-spacing:1.5px;border-radius:var(--r);transition:var(--t);}
+    .btn-back:hover{border-color:rgba(201,169,110,.3);color:var(--white);}
+
+    @media(max-width:900px){
+      body{overflow:auto;}
+      .signup-page{grid-template-columns:1fr;}
+      .signup-left{display:none;}
+      .signup-right{padding:40px 24px;min-height:100vh;}
+    }
+  </style>

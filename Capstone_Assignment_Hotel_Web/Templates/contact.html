@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Contact Us — Paramount Hotel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+ 
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo" onclick="location.href='index.html'"><span>Paramount</span> Hotel</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="rooms.html">Rooms</a>
+    <a href="bookings.html">My Bookings</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+  <div id="nav-auth"></div>
+  <button class="hamburger" onclick="toggleMob()">&#9776;</button>
+</nav>
+<div class="mobile-menu" id="mob">
+  <a href="index.html">Home</a><a href="rooms.html">Rooms</a>
+  <a href="bookings.html">My Bookings</a><a href="contact.html">Contact</a>
+</div>
+
+<!-- HERO -->
+<div class="contact-hero">
+  <div class="section-label">Reach Us</div>
+  <div class="section-title" style="max-width:500px">We'd Love to<br><em>Hear From You</em></div>
+  <p class="section-sub" style="margin-top:12px">Have a question or special request? Our team is available 24 hours a day.</p>
+</div>
+
+<!-- BODY -->
+<div class="contact-body">
+
+  <!-- Left: Contact cards -->
+  <div class="contact-cards">
+    <div class="contact-card">
+      <div class="c-icon">👤</div>
+      <div class="c-title">Owner</div>
+      <div class="c-detail"><strong style="color:var(--white)">Aayush Kumar</strong></div>
+    </div>
+    <div class="contact-card">
+      <div class="c-icon">📍</div>
+      <div class="c-title">Address</div>
+      <div class="c-detail">Gurugram, Haryana<br>India — 122001</div>
+    </div>
+    <div class="contact-card">
+      <div class="c-icon">📞</div>
+      <div class="c-title">Phone</div>
+      <div class="c-detail"><a href="tel:+919253109057">+91 92531 09057</a><br>Available 24/7</div>
+    </div>
+    <div class="contact-card">
+      <div class="c-icon">✉️</div>
+      <div class="c-title">Email</div>
+      <div class="c-detail">
+        <a href="mailto:77aayushkumar@gmail.com">77aayushkumar@gmail.com</a><br>
+        <a href="mailto:reservations@paramount-hotel.com">reservations@paramount-hotel.com</a>
+      </div>
+    </div>
+    <div class="contact-card">
+      <div class="c-icon">🕐</div>
+      <div class="c-title">Check-in / Check-out</div>
+      <div class="c-detail">Check-in: 3:00 PM<br>Check-out: 11:00 AM</div>
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="contact-form-box">
+    <h3>Send a Message</h3>
+    <div class="form-group"><label>Your Name *</label><input type="text" id="c-name" placeholder="Full name"/></div>
+    <div class="form-group"><label>Your Email *</label><input type="email" id="c-email" placeholder="your@email.com"/></div>
+    <div class="form-group">
+      <label>Subject</label>
+      <select id="c-subject" style="width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.2);border-radius:var(--r);color:var(--white);font-family:var(--sans);font-size:.9rem;padding:13px 15px;outline:none;">
+        <option>Reservation Enquiry</option>
+        <option>Special Occasion</option>
+        <option>Corporate Events</option>
+        <option>Feedback</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Message *</label><textarea id="c-msg" rows="5" placeholder="Write your message here..."></textarea></div>
+    <button class="btn-send" onclick="sendMsg()">Send Message →</button>
+    <div class="msg" id="contact-msg"></div>
+  </div>
+</div>
+
+<footer class="site-footer" style="margin-top:0">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo"><em>Paramount</em> Hotel</div>
+      <p>Every stay is a story worth remembering.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Navigation</h4>
+      <a href="index.html">Home</a><a href="rooms.html">Rooms</a>
+      <a href="bookings.html">My Bookings</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:77aayushkumar@gmail.com">77aayushkumar@gmail.com</a>
+      <a href="tel:+919253109057">+91 92531 09057</a>
+      <a>Gurugram, Haryana, India</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 Paramount Hotel by Aayush Kumar. All rights reserved.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/backend.js"></script>
+<script>
+  window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>10));
+  function toggleMob(){document.getElementById('mob').classList.toggle('open');}
+  (function(){
+    const s=DB.getSession(), a=document.getElementById('nav-auth');
+    if(s) a.innerHTML=`<span style="font-size:.7rem;letter-spacing:1.5px;color:var(--gold);margin-right:12px">Hi, ${s.name.split(' ')[0]}</span><button class="nav-btn" onclick="location.href='bookings.html'">Bookings</button><button class="nav-btn solid" onclick="DB.clearSession();location.reload()" style="margin-left:8px">Sign Out</button>`;
+    else  a.innerHTML=`<button class="nav-btn" onclick="location.href='login.html'">Sign In</button><button class="nav-btn solid" onclick="location.href='signup.html'" style="margin-left:8px">Register</button>`;
+  })();
+
+  function sendMsg(){
+    const name=document.getElementById('c-name').value.trim();
+    const email=document.getElementById('c-email').value.trim();
+    const msg=document.getElementById('c-msg').value.trim();
+    const fb=document.getElementById('contact-msg');
+    if(!name||!email||!msg){fb.textContent='Please fill in all required fields.';fb.className='msg error';return;}
+    fb.textContent='✓ Message sent! We\'ll be in touch within 24 hours.';fb.className='msg success';
+    document.getElementById('c-name').value='';
+    document.getElementById('c-email').value='';
+    document.getElementById('c-msg').value='';
+    setTimeout(()=>{fb.textContent='';},6000);
+  }
+</script>
+</body>
+</html>
+
+
+ <style>
+    body{padding-top:72px;}
+    .contact-hero{
+      padding:100px 56px 70px;
+      background:linear-gradient(180deg,rgba(10,10,10,.62) 0%,rgba(10,10,10,.96) 100%),
+        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600&q=90') center/cover no-repeat;
+    }
+    .contact-body{display:grid;grid-template-columns:1fr 1.5fr;gap:60px;padding:72px 56px;background:var(--dark);}
+    .contact-cards{display:flex;flex-direction:column;gap:18px;}
+    .contact-card{background:var(--charcoal);border:1px solid rgba(201,169,110,.1);border-radius:var(--r-lg);padding:24px 26px;transition:var(--t);}
+    .contact-card:hover{border-color:rgba(201,169,110,.28);}
+    .c-icon{font-size:1.5rem;margin-bottom:10px;}
+    .c-title{font-size:.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+    .c-detail{font-size:.84rem;color:var(--muted);line-height:1.8;}
+    .c-detail a{color:var(--muted);transition:var(--t);}
+    .c-detail a:hover{color:var(--gold);}
+    .contact-form-box{background:var(--charcoal);border:1px solid rgba(201,169,110,.12);border-radius:var(--r-lg);padding:44px;}
+    .contact-form-box h3{font-family:var(--serif);font-size:1.7rem;font-weight:300;margin-bottom:26px;}
+    .btn-send{width:100%;background:var(--gold);color:var(--dark);padding:15px;border:none;cursor:pointer;font-family:var(--sans);font-size:.74rem;letter-spacing:2px;text-transform:uppercase;font-weight:500;border-radius:var(--r);transition:var(--t);margin-top:4px;}
+    .btn-send:hover{background:var(--gold-light);}
+    @media(max-width:900px){
+      .contact-hero{padding:80px 22px 50px;}
+      .contact-body{grid-template-columns:1fr;padding:50px 22px;}
+      .contact-form-box{padding:28px 22px;}
+    }
+  </style>

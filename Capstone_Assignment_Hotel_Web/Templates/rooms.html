@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Rooms &amp; Suites — Paramount Hotel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+ 
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo" onclick="location.href='index.html'"><span>Paramount</span> Hotel</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="rooms.html" class="active">Rooms</a>
+    <a href="bookings.html">My Bookings</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div id="nav-auth"></div>
+  <button class="hamburger" onclick="toggleMob()">&#9776;</button>
+</nav>
+<div class="mobile-menu" id="mob">
+  <a href="index.html">Home</a>
+  <a href="rooms.html">Rooms</a>
+  <a href="bookings.html">My Bookings</a>
+  <a href="contact.html">Contact</a>
+</div>
+
+<!-- HERO -->
+<div class="rooms-hero">
+  <div>
+    <div class="section-label">Our Accommodations</div>
+    <h1>Suites &amp; <em>Residences</em></h1>
+    <p>Discover your perfect retreat from our curated collection of luxury accommodations.</p>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterRooms('all',this)">All Rooms</button>
+  <button class="filter-btn" onclick="filterRooms('Classic Room',this)">Classic</button>
+  <button class="filter-btn" onclick="filterRooms('Premium Suite',this)">Premium</button>
+  <button class="filter-btn" onclick="filterRooms('Villa',this)">Villas</button>
+  <button class="filter-btn" onclick="filterRooms('Presidential Suite',this)">Presidential</button>
+  <button class="filter-btn" onclick="filterRooms('Penthouse',this)">Penthouse</button>
+  <div class="sort-wrap">
+    <span>Sort by:</span>
+    <select onchange="applySort(this.value)">
+      <option value="">Default</option>
+      <option value="asc">Price: Low → High</option>
+      <option value="desc">Price: High → Low</option>
+    </select>
+  </div>
+</div>
+
+<!-- ROOMS GRID -->
+<div class="rooms-wrap">
+  <div class="rooms-grid" id="rooms-grid"></div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-room-info" id="modal-room-info"></div>
+    <h2 class="modal-title">Reserve Your Suite</h2>
+    <div class="form-row">
+      <div class="form-group"><label>Full Name</label><input type="text" id="m-name" placeholder="Your full name"/></div>
+      <div class="form-group"><label>Email Address</label><input type="email" id="m-email" placeholder="your@email.com"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Check-in Date</label><input type="date" id="m-ci" onchange="calcPrice()"/></div>
+      <div class="form-group"><label>Check-out Date</label><input type="date" id="m-co" onchange="calcPrice()"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Guests</label>
+        <select id="m-guests" class="modal-select"><option>1 Guest</option><option>2 Guests</option><option>3 Guests</option><option>4 Guests</option></select>
+      </div>
+      <div class="form-group"><label>Special Requests</label><input type="text" id="m-special" placeholder="e.g. early check-in"/></div>
+    </div>
+    <div class="price-box">
+      <div class="price-box-label">Estimated Total</div>
+      <div class="price-estimate" id="price-est">—</div>
+      <div class="price-box-note" id="price-note"></div>
+    </div>
+    <button class="modal-btn" onclick="confirmBooking()">Confirm Reservation</button>
+    <div class="msg modal-msg" id="modal-msg"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-bottom" style="border-top:none">
+    <span>© 2024 Paramount Hotel by Aayush Kumar. All rights reserved.</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/backend.js"></script>
+<script>
+  // Navbar
+  window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',scrollY>10));
+  function toggleMob(){document.getElementById('mob').classList.toggle('open');}
+  (function refreshNav(){
+    const s=DB.getSession(), a=document.getElementById('nav-auth');
+    if(s) a.innerHTML=`<span style="font-size:.7rem;letter-spacing:1.5px;color:var(--gold);margin-right:12px">Hi, ${s.name.split(' ')[0]}</span><button class="nav-btn" onclick="location.href='bookings.html'">Bookings</button><button class="nav-btn solid" onclick="DB.clearSession();location.reload()" style="margin-left:8px">Sign Out</button>`;
+    else  a.innerHTML=`<button class="nav-btn" onclick="location.href='login.html'">Sign In</button><button class="nav-btn solid" onclick="location.href='signup.html'" style="margin-left:8px">Register</button>`;
+  })();
+
+  const today=new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(e=>e.min=today);
+
+  // Pre-fill dates if coming from search
+  const search=JSON.parse(sessionStorage.getItem('ph_search')||'null');
+  if(search){ document.getElementById('m-ci').value=search.ci; document.getElementById('m-co').value=search.co; }
+
+  let activeFilter='all', sortDir='', activeRoom=null;
+
+  function buildCard(r){
+    return `<div class="room-card" onclick="openModal('${r.id}')">
+      <div class="room-img-wrap">
+        <img class="room-img" src="${r.img}" alt="${r.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=80'"/>
+        <div class="room-badge">${r.badge}</div>
+      </div>
+      <div class="room-body">
+        <div class="room-type">${r.type}</div>
+        <div class="room-name">${r.name}</div>
+        <div class="room-desc">${r.desc}</div>
+        <div class="room-amenities">${r.amenities.map(a=>`<span class="amenity-tag">${a}</span>`).join('')}</div>
+        <div class="room-footer">
+          <div class="room-price">₹${r.price.toLocaleString('en-IN')}<span>per night · ${r.size} · max ${r.maxGuests} guests</span></div>
+          <button class="room-book-btn" onclick="event.stopPropagation();openModal('${r.id}')">Reserve</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function render(){
+    let list = activeFilter==='all' ? [...ROOMS] : ROOMS.filter(r=>r.type===activeFilter);
+    if(sortDir==='asc')  list.sort((a,b)=>a.price-b.price);
+    if(sortDir==='desc') list.sort((a,b)=>b.price-a.price);
+    const g=document.getElementById('rooms-grid');
+    g.innerHTML = list.length ? list.map(buildCard).join('') : '<p style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);font-style:italic">No rooms found for this filter.</p>';
+  }
+  render();
+
+  function filterRooms(type,btn){
+    activeFilter=type;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+  function applySort(v){ sortDir=v; render(); }
+
+  // Modal
+  function openModal(roomId){
+    activeRoom=ROOMS.find(r=>r.id===roomId); if(!activeRoom) return;
+    const s=DB.getSession();
+    document.getElementById('m-name').value  = s?s.name:'';
+    document.getElementById('m-email').value = s?s.email:'';
+    document.getElementById('m-ci').value    = search?search.ci:'';
+    document.getElementById('m-co').value    = search?search.co:'';
+    document.getElementById('m-special').value='';
+    document.getElementById('price-est').textContent='—';
+    document.getElementById('price-note').textContent='';
+    document.getElementById('modal-msg').textContent='';
+    document.getElementById('modal-msg').className='msg modal-msg';
+    document.getElementById('modal-room-info').innerHTML=`
+      <img class="modal-room-img" src="${activeRoom.img}" alt="${activeRoom.name}" onerror="this.src='https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80'"/>
+      <div><div class="modal-room-name">${activeRoom.name}</div>
+      <div class="modal-room-price">₹${activeRoom.price.toLocaleString('en-IN')} / night · ${activeRoom.size}</div></div>`;
+    document.getElementById('booking-modal').classList.add('open');
+    document.body.style.overflow='hidden';
+    if(search) calcPrice();
+  }
+  function closeModal(){
+    document.getElementById('booking-modal').classList.remove('open');
+    document.body.style.overflow='';
+    activeRoom=null;
+  }
+  document.getElementById('booking-modal').addEventListener('click',e=>{ if(e.target.id==='booking-modal') closeModal(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+  function calcPrice(){
+    const ci=document.getElementById('m-ci').value, co=document.getElementById('m-co').value;
+    const el=document.getElementById('price-est'), note=document.getElementById('price-note');
+    if(!ci||!co||!activeRoom){el.textContent='—';note.textContent='';return;}
+    const n=Math.round((new Date(co)-new Date(ci))/86400000);
+    if(n<=0){el.textContent='—';note.textContent='Check-out must be after check-in';return;}
+    el.textContent=`₹${(n*activeRoom.price).toLocaleString('en-IN')}`;
+    note.textContent=`${n} night${n>1?'s':''} × ₹${activeRoom.price.toLocaleString('en-IN')}`;
+  }
+
+  function confirmBooking(){
+    const s=DB.getSession(), msgEl=document.getElementById('modal-msg');
+    if(!s){ setMsg(msgEl,'Please sign in first to make a reservation.','error'); setTimeout(()=>{closeModal();location.href='login.html';},1300); return; }
+    const name  =document.getElementById('m-name').value.trim();
+    const email =document.getElementById('m-email').value.trim();
+    const ci    =document.getElementById('m-ci').value;
+    const co    =document.getElementById('m-co').value;
+    const guests=document.getElementById('m-guests').value;
+    const special=document.getElementById('m-special').value.trim();
+    if(!name||!email||!ci||!co){setMsg(msgEl,'Please fill in all required fields.','error');return;}
+    const res=DB.createBooking({roomId:activeRoom.id,guestName:name,guestEmail:email,checkin:ci,checkout:co,guests,special});
+    if(!res.success){setMsg(msgEl,res.error,'error');return;}
+    setMsg(msgEl,'✓ Reservation confirmed! Redirecting…','success');
+    setTimeout(()=>{closeModal();location.href='bookings.html';},1100);
+  }
+
+  function setMsg(el,text,type){ el.textContent=text; el.className='msg modal-msg '+type; }
+
+  let _tt;
+  function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3400);}
+</script>
+</body>
+</html>
+
+ <style>
+    body{padding-top:72px;}
+    .rooms-hero{
+      min-height:46vh;
+      background:linear-gradient(180deg,rgba(10,10,10,.55) 0%,rgba(10,10,10,.94) 100%),
+        url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1800&q=90') center/cover no-repeat;
+      display:flex;align-items:flex-end;padding:52px 56px;
+    }
+    .rooms-hero h1{font-family:var(--serif);font-size:clamp(2.4rem,5vw,4.2rem);font-weight:300;line-height:1.1;}
+    .rooms-hero h1 em{font-style:italic;color:var(--gold);}
+    .rooms-hero p{font-size:.88rem;color:var(--muted);max-width:400px;line-height:1.8;margin-top:10px;font-weight:300;}
+
+    .filter-bar{display:flex;gap:10px;padding:24px 56px;background:var(--dark);border-bottom:1px solid rgba(201,169,110,.07);flex-wrap:wrap;align-items:center;}
+    .filter-btn{background:transparent;border:1px solid rgba(201,169,110,.22);color:var(--muted);padding:8px 22px;font-family:var(--sans);font-size:.68rem;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:20px;transition:var(--t);}
+    .filter-btn:hover,.filter-btn.active{background:var(--gold);border-color:var(--gold);color:var(--dark);}
+    .sort-wrap{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.7rem;color:var(--muted);}
+    .sort-wrap select{background:var(--charcoal);border:1px solid rgba(201,169,110,.2);color:var(--white);padding:7px 12px;border-radius:var(--r);font-family:var(--sans);font-size:.7rem;outline:none;cursor:pointer;}
+
+    .rooms-wrap{padding:52px 56px;background:var(--charcoal);}
+
+    @media(max-width:900px){
+      .rooms-hero{padding:40px 22px;}
+      .filter-bar{padding:18px 22px;}
+      .rooms-wrap{padding:36px 22px;}
+      .sort-wrap{display:none;}
+    }
+  </style>
