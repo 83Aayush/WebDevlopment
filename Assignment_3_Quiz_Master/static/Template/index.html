@@ -1,1 +1,34 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Master</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'quiz/style.css' %}">
+</head>
+<body>
+    <div class="page home-page">
+        <div class="home-card">
+            <div class="logo">🧠</div>
+            <h1>Quiz Master</h1>
+            <p class="subtitle">Web Programming with Python & Django</p>
+            <div class="info-grid">
+                <div class="info-box">
+                    <span class="info-num">7</span>
+                    <span class="info-label">Questions</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-num">MCQ</span>
+                    <span class="info-label">Format</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-num">10</span>
+                    <span class="info-label">Minutes</span>
+                </div>
+            </div>
+            <a href="{% url 'quiz' %}" class="btn-start">Start Quiz →</a>
+        </div>
+    </div>
+</body>
+</html>

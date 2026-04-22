@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Quiz Master</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'quiz/style.css' %}">
+</head>
+<body>
+    <div class="page quiz-page">
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <h1>🧠 Quiz Master</h1>
+                <div class="timer-box">
+                    ⏱ Time: <span id="timer">10:00</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'result' %}" id="quiz-form">
+                {% csrf_token %}
+
+                {% for q in questions %}
+                <div class="question-card" id="card-{{ forloop.counter }}">
+                    <div class="q-number">Question {{ forloop.counter }} of {{ questions|length }}</div>
+                    <p class="q-text">{{ q.question }}</p>
+                    <div class="options">
+                        {% for option in q.options %}
+                        <label class="option-label">
+                            <input type="radio" name="q{{ q.id }}" value="{{ forloop.counter0 }}" required>
+                            <span class="option-text">{{ option }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="submit-area">
+                    <p class="submit-note">⚠️ Make sure you answer all questions before submitting.</p>
+                    <button type="submit" class="btn-submit">Submit Quiz ✓</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Timer
+        let seconds = 600;
+        const timerEl = document.getElementById('timer');
+        const interval = setInterval(() => {
+            seconds--;
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            timerEl.textContent = `${m}:${s}`;
+            if (seconds <= 60) timerEl.style.color = '#e74c3c';
+            if (seconds <= 0) {
+                clearInterval(interval);
+                document.getElementById('quiz-form').submit();
+            }
+        }, 1000);
+
+        // Highlight selected option
+        document.querySelectorAll('.option-label').forEach(label => {
+            label.querySelector('input').addEventListener('change', () => {
+                label.closest('.options').querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+                label.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

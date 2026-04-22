@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Quiz Master</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'quiz/style.css' %}">
+</head>
+<body>
+    <div class="page result-page">
+        <div class="result-container">
+            <div class="score-card">
+                <div class="grade grade-{{ grade_color }}">{{ grade }}</div>
+                <h1>Your Score</h1>
+                <div class="score-display">{{ score }} / {{ total }}</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ percent }}%"></div>
+                </div>
+                <p class="percent">{{ percent }}%</p>
+                <p class="feedback">{{ feedback }}</p>
+                <div class="result-btns">
+                    <a href="{% url 'quiz' %}" class="btn-restart">🔁 Restart Quiz</a>
+                    <a href="{% url 'home' %}" class="btn-home">🏠 Home</a>
+                </div>
+            </div>
+
+            <div class="review-section">
+                <h2>Review Answers</h2>
+                {% for r in results %}
+                <div class="review-card {% if r.is_correct %}correct{% else %}wrong{% endif %}">
+                    <p class="review-q"><strong>Q{{ forloop.counter }}.</strong> {{ r.question }}</p>
+                    <div class="review-options">
+                        {% for opt in r.options %}
+                        <div class="review-option
+                            {% if forloop.counter0 == r.correct %}correct-opt{% endif %}
+                            {% if forloop.counter0 == r.user_answer and not r.is_correct %}wrong-opt{% endif %}
+                        ">
+                            {% if forloop.counter0 == r.correct %}✓{% elif forloop.counter0 == r.user_answer %}✗{% else %}○{% endif %}
+                            {{ opt }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p class="review-status">
+                        {% if r.is_correct %}
+                            ✅ Correct!
+                        {% elif r.user_answer is None %}
+                            ⚠️ Not answered
+                        {% else %}
+                            ❌ Wrong — Correct: {{ r.correct_text }}
+                        {% endif %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
